@@ -22,13 +22,12 @@ def letter_frequency(hexstr):
             hexstr.decode('hex'))
 
     freq = [msg.count(chr(letter)) * 1.0 / len(msg) # frequency in msg
-            for letter in range(ord('A'), ord('z'))
-            if len(msg) > 0]
+            for letter in range(ord('A'), ord('z'))]
 
     return sum(map(lambda x: x * x, freq))
 
 def pair_freq(cipher):
-    printable = set(string.printable) - {'}', '{', '~', '|', ';'}
+    printable = set(string.printable)
 
     xors = [singlebyte_xor(cipher, chr(letter))
             for letter in range(ord('A'), ord('z'))]
@@ -36,20 +35,15 @@ def pair_freq(cipher):
 
     return [(msg, letter_frequency(msg)) 
             for msg in xors
-            if all(c in printable for c in str(bytearray(msg)).decode('hex'))]
+            if str(bytearray(msg)).decode('hex') in printable]
 
 
 def brute_force(cipher):
-    freq_pairs = pair_freq(cipher)
-    min_freq = min(freq_pairs, key=lambda (a,b): b)[1]
-    
-    for x in[(str(bytearray(a)).decode('hex'), b) 
-            for (a, b) in pair_freq(cipher) 
-            if abs(b - min_freq) < 0.00001]:
-
-            print x[0]
-
+    pass
 
 cipher = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
 
-brute_force(cipher)
+#print str(bytearray(singlebyte_xor(cipher, 'X'))).decode('hex')
+
+for x in[(str(bytearray(a)).decode('hex'), b) for (a, b) in pair_freq(cipher)]:
+    print x
