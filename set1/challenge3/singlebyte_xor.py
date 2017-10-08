@@ -14,45 +14,32 @@ def singlebyte_xor(hexstr, singlechar):
 
     return hexstr_xor(hexstr, charstr.encode('hex'))
 
-def letter_frequency(hexstr):
-    # NOTE: ignores all non english characters
 
-    # remove all non english characters
-    msg = filter(lambda c: ord(c) >= ord('A') and ord(c) <= ord('z'), 
-            hexstr.decode('hex'))
+printable = set(string.printable) - set('~#`|')
 
-    freq = [msg.count(chr(letter)) * 1.0 / len(msg) # frequency in msg
-            for letter in range(ord('A'), ord('z'))
-            if len(msg) > 0]
+xor_e = lambda x: chr(x ^ ord('e'))
 
-    return sum(map(lambda x: x * x, freq))
+def letter_freq(cipher):
+    msg = cipher.decode('hex')
 
-printable = set(string.printable) - set('{}|;~<>%$^*#+')
+    counts = [(chr(k), msg.count(chr(k)))
+              for k in range(1, 256)
+              if msg.count(chr(k)) > 0
+              and all([c in printable # makes a legal word
+                       for c in singlebyte_xor(cipher, xor_e(k)).decode('hex')])]
 
-def pair_freq(cipher):
-    xors = [singlebyte_xor(cipher, chr(letter))
-            for letter in range(0, 256)]
+    counts.sort(key = lambda (a,b): b, reverse=True)
+    return counts
 
-
-    return [(msg, letter_frequency(msg)) 
-            for msg in xors
-            if all(c in printable for c in str(bytearray(msg)).decode('hex'))]
-
-
-def brute_force(cipher):
-    freq_pairs = pair_freq(cipher)
-    if len(freq_pairs) == 0:
-        return
+def singlebyte_crack(cipher):
+    key = lambda letter: xor_e(ord(letter))
+    return [(key(letter), singlebyte_xor(cipher, key(letter)).decode('hex'))
+            for letter, _ in letter_freq(cipher)]
     
-    min_freq = min(freq_pairs, key=lambda (a,b): b)[1]
     
-    for x in[(str(bytearray(a)).decode('hex'), b) 
-            for (a, b) in pair_freq(cipher) 
-            if abs(b - min_freq) < 0.000001]:
-
-            print x[0]
 
 '''TEST
 cipher = '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
 
-brute_force(cipher)'''
+for key, msg in singlebyte_crack(cipher):
+    print key + " --> " + msg'''
