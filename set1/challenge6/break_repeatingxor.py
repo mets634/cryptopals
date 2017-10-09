@@ -28,8 +28,8 @@ def calc_IOC(cipher, keysize):
     return (sum(distances) / len(distances)) * 1.0 / keysize
 
 def find_keysize(cipher):
-    return min([(calc_IOC(cipher, length), length)
-        for length in range(3, 100)], key = lambda (a,b): a)[1]
+    return sorted([(calc_IOC(cipher, length), length)
+        for length in range(3, 40)], key = lambda (a,b): a)
 
 def transpose_blocks(cipher, keysize):
     block = lambda x: get_block(cipher, keysize, x)
@@ -51,7 +51,7 @@ def find_key(cipher, keysize):
         print "select correct key..."
         print ""
         for key,msg in solve_block(block):
-            print str(ord(key)) + " --> " + msg
+            print str(key) + " --> " + msg
 
 
 '''TEST
