@@ -15,6 +15,10 @@ def sxor(str1, str2):
 
 def ecb_encrypt(msg, key):
     aes = AES.new(key, AES.MODE_ECB)
+
+    block_count = int(ceil(len(msg) / 16.0))
+    msg = pad(msg, block_count * 16)
+
     return aes.encrypt(msg)
 
 def ecb_decrypt(cipher, key):
@@ -24,9 +28,9 @@ def ecb_decrypt(cipher, key):
 def cbc_encrypt(iv, msg, key):
     block = lambda k: msg[k * len(key) : (k + 1) * len(key)]
 
-    block_count = int(ceil(len(msg) * 1.0 / len(key)))
+    block_count = int(ceil(len(msg) / 16.0))
     
-    msg = pad(block_count * len(key))
+    msg = pad(msg, block_count * 16)
 
     prev_cipher = iv
     cipher = ''
@@ -41,7 +45,7 @@ def cbc_encrypt(iv, msg, key):
     return cipher
 
 def cbc_decrypt(iv, cipher, key):
-    block_count = int(ceil(len(cipher) * 1.0 / len(key)))
+    block_count = int(ceil(len(cipher) * 16.0))
 
     def block(k):
         if k == -1:
@@ -58,6 +62,7 @@ def cbc_decrypt(iv, cipher, key):
 
     return msg
 
+'''
 with open('10.txt') as f:
     cipher = b64decode(f.read())
-    print cbc_decrypt('\x00\x00\x00\x00', cipher, 'YELLOW SUBMARINE')
+    print cbc_decrypt('\x00\x00\x00\x00', cipher, 'YELLOW SUBMARINE')'''
