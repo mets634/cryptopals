@@ -12,7 +12,7 @@ def gen_aes_key():
     return os.urandom(16)
 
 def encrypt_oracle(data):
-    random_garbage = lambda: 'a' * randint(5, 10)
+    random_garbage = lambda: os.urandom(randint(5, 10))
     random_iv = lambda: os.urandom(4)
 
     msg = random_garbage() + data + random_garbage()
