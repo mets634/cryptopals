@@ -8,6 +8,8 @@ from challenge11 import *
 from challenge10 import *
 from base64 import b64decode
 from challenge11 import detect_oracle
+from math import ceil
+
 
 POSTFIX = b64decode('Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK')
 
@@ -32,38 +34,42 @@ def find_blocksize():
         prev = cipher
         data = data + 'a'
 
-def byte_byte_attack(blocknum=0, data=None):
+def byte_byte_attack(blocknum=0, deciphered=''):
     blocksize = find_blocksize()
 
-    # initial block
-    if blocknum == 0:
-        data = 'a' * blocksize
+    current_block = lambda cipher: cipher[
+            blocksize * blocknum : blocksize * (blocknum + 1)]
+
+    data = 'a' * blocksize
 
     block = ''
-    for _ in xrange(1, blocksize + 1):
-        data = data[:-1]
+    for _ in xrange(blocksize):
+        data = data[1:] # remove first byte from data (is an 'a' byte)
 
-        outputs = { my_encrypt_oracle(data + block + chr(c))[
-            blocksize * blocknum : (blocknum + 1) * blocksize] : 
-                
-            data + block + chr(c)
+        outputs = { current_block(
+            my_encrypt_oracle(data + deciphered + block + chr(c)) ) :
+            chr(c)
+
             for c in range(256) }
 
-        matching_block = outputs[my_encrypt_oracle(data)[
-            blocksize * blocknum : (blocknum + 1) * blocksize]]
-
-        block = block + matching_block[-1]
+        matching_byte = outputs[
+                current_block(my_encrypt_oracle(data))]
+        
+        block = block + matching_byte
 
     return block
     
+def main():
+    print 'BLOCK SIZE --> ' + str(find_blocksize())
+    if detect_oracle(my_encrypt_oracle) == 1:
+        print 'AES MODE --> ECB'
+    else:
+        print 'AES MODE --> CBC'
 
-print 'BLOCK SIZE --> ' + str(find_blocksize())
-if detect_oracle(my_encrypt_oracle) == 1:
-    print 'AES MODE --> ECB'
-else:
-    print 'AES MODE --> CBC'
+    print 'DECRYPTED BLOCKS --> '
+    msg = ''
+    for k in xrange(int(ceil(len(POSTFIX) / 16.0))):
+        msg = msg + byte_byte_attack(k, msg)
+    print msg
 
-print 'DECRYPTED BLOCK --> ' 
-prev = byte_byte_attack()
-print prev
-print byte_byte_attack(1, prev)
+# main()
