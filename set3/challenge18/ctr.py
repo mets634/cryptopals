@@ -5,11 +5,6 @@ from math import ceil
 import struct
 
 def sxor(msg1, msg2):
-    index = min(len(msg1), len(msg2))
-
-    msg1 = msg1[: index - 1]
-    msg2 = msg2[: index - 1]
-
     return ''.join([chr(ord(c1) ^ ord(c2)) for c1, c2 in zip(msg1, msg2)])
 
 def encrypt(msg, nonce, key):
@@ -29,6 +24,7 @@ def decrypt(cipher, nonce, key):
     return encrypt(cipher, nonce, key)
 
 
+""" TEST
 cipher = 'L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ=='.decode('base64')
 
-print decrypt(cipher, '\x00' * 16, 'YELLOW SUBMARINE')
+print decrypt(cipher, '\x00' * 16, 'YELLOW SUBMARINE')"""
