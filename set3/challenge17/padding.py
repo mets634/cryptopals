@@ -48,7 +48,11 @@ def decrypt(cipher):
     crypt = AES.new(KEY, AES.MODE_CBC, IV)
     
     msg = crypt.decrypt(cipher)
-    return unpad(msg)
+    try:
+        unpad(msg)
+        return True
+    except Exception:
+        return False
 
 for k in range(4):
     print decrypt(oracle())
