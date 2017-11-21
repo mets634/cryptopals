@@ -30,9 +30,9 @@ class mt(object):
             return first | last
 
         def transform(k, func):
-            temp = (calc_temp(k) >> 1) ^ 0x9908b0df
+            temp = (calc_temp(k) >> 1) ^ self.state[func(k)]
             if temp & 0x1: # is odd
-                temp = temp ^ self.state[func(k)]
+                temp = temp ^ 0x9908b0df
             self.state[k] = temp 
  
         if self.index >= 624: # need to generate more words
@@ -55,3 +55,5 @@ def test():
     rand = mt(10)
     for k in xrange(15):
         print str(k) + " --> " + str(rand.next())
+
+#test()
