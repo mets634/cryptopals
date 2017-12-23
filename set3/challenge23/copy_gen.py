@@ -10,32 +10,30 @@ class copy_mt(object):
         '''Taken from 
         en.wikipedia.org/wiki/Mersenne_Twister#Initialization'''
         
-        def untemper(num):
-            def right(num, k):
-                def msb(k):
-                    return 0xffffffff << (32 - k) & 0xffffffff
-                def lsb(k):
-                    return 0xffffffff >> (32 - k) & 0xffffffff
-                
-                m = num & msb(32 - k)
-                mid = num & (0xffffffff - (msb(32 - k) | lsb(k)))
-                l = num & lsb(k)
-                
-                return m | (m >> k) ^ mid | (((m >> k) ^ mid) >> k) ^ l
+        def untemper(num): 
+            def lsb(n, k):
+                if k < 0:
+                    return 0
+                return (n >> k) & 0x01
+            def setlsb(n, k, val):
+                return n | (val << k)
+            def msb(n, k):
+                if k < 0:
+                    return 0
+                return lsb(n, 31 - k)
+            def setmsb(n, k, val):
+                return setlsb(n, 31 - k, val)
 
-            def left(num, k, n):
-                def lsb(num, k):
-                    if k < 0:
-                        return 0
-                    return (num >> k) & 1
-                
-                def set_lsb(num, k, val):
-                    return num | (val << k)
-
-                temp = 0
-                for i in xrange(32):
-                    temp = set_lsb(num, i, lsb(num, i) ^ (lsb(temp, i - n) & lsb(n, i)))
-                return temp
+            def right(n, k):
+                res = 0
+                for x in xrange(32):
+                    res = setmsb(res, x, msb(n, x) ^ msb(res, x - k))
+                return res
+            def left(n, k, s):
+                res = 0
+                for x in xrange(32):
+                    res = setlsb(res, x, lsb(n, x) ^ (lsb(res, x - k) & lsb(s, x)))
+                return res
 
             num = right(num, 18)
             num = left(num, 15, 0xefc60000)
